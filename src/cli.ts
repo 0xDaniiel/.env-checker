@@ -3,6 +3,7 @@ import { Command } from "commander";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import chalk from "chalk";
 import { validateTypes } from "./validateTypes.ts";
 import { detectSensitive } from "./detectSensitive.ts";
 
@@ -33,17 +34,17 @@ program
           .join("\n");
         const examplePath = path.resolve(process.cwd(), options.example);
         fs.writeFileSync(examplePath, exampleContent, "utf-8");
-        console.log(`Generated ${examplePath} from ${envPath}`);
+        console.log(chalk.green(`✅ Generated ${examplePath} from ${envPath}`));
         process.exit(0);
       } catch (err) {
-        console.error(`Failed to generate .env.example:`, err);
+        console.error(chalk.red(`❌ Failed to generate .env.example:`), err);
         process.exit(1);
       }
     }
 
     const result = dotenv.config({ path: envPath });
     if (result.error) {
-      console.error(`Failed to load ${envPath}`, result.error);
+      console.error(chalk.red(`❌ Failed to load ${envPath}:`), result.error);
       process.exit(1);
     }
 
@@ -52,7 +53,7 @@ program
     try {
       exampleContent = fs.readFileSync(examplePath, "utf-8");
     } catch (err) {
-      console.error(`Failed to read ${examplePath}`, err);
+      console.error(chalk.red(`❌ Failed to read ${examplePath}:`), err);
       process.exit(1);
     }
 
@@ -67,29 +68,35 @@ program
       console.log(JSON.stringify(output, null, 2));
     } else {
       if (missing.length) {
-        console.warn("Missing variables:", missing.join(", "));
+        console.warn(
+          chalk.yellow(`⚠️ Missing variables: ${missing.join(", ")}`)
+        );
       }
       if (extra.length) {
-        console.warn("Extra variables:", extra.join(", "));
+        console.warn(chalk.yellow(`⚠️ Extra variables: ${extra.join(", ")}`));
       }
       if (!missing.length && !extra.length) {
-        console.log("All variables match!");
+        console.log(chalk.green("✅ All variables match!"));
       }
     }
 
     // Validate types
-    const typeValidationResult = validateTypes(envVars, exampleVars);
+    const typeValidationResult = validateTypes(envVars, exampleContent);
     if (typeValidationResult.errors.length) {
-      typeValidationResult.errors.forEach((err: string) => console.error(err));
+      typeValidationResult.errors.forEach((err: string) =>
+        console.error(chalk.red(`❌ ${err}`))
+      );
       if (options.ci) process.exit(1);
     } else {
-      console.log("All types/formats look good!");
+      console.log(chalk.green("✅ All types/formats look good!"));
     }
 
     // Detect sensitive data
     const sensitiveWarnings = detectSensitive(envVars);
     if (sensitiveWarnings.length) {
-      sensitiveWarnings.forEach((warn) => console.warn(warn));
+      sensitiveWarnings.forEach((warn) =>
+        console.warn(chalk.yellow(`⚠️ ${warn}`))
+      );
       if (options.ci) process.exit(1);
     }
 

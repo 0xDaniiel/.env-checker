@@ -1,5 +1,7 @@
 # `.env-checker` 🛡
 
+![npm version](https://img.shields.io/npm/v/env-checker)
+
 > A fast, CI-friendly CLI & API to validate `.env` files — checks for missing/extra variables, type/format errors, and sensitive values. Includes `.env.example` generator.
 
 ---
@@ -52,7 +54,6 @@ npm install --save-dev env-checker
 
 ```
 npx env-checker [options]
-
 ```
 
 ```
@@ -78,3 +79,21 @@ envFile: '.env',
 ci: true
 });
 ```
+
+## 📜 License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+---
+
+## 🤝 Contributing
+
+We welcome contributions!
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature-name`)
+3. Commit your changes (`git commit -m 'Add some feature'`)
+4. Push to the branch (`git push origin feature-name`)
+5. Open a Pull Request
+
+Please open an issue to discuss major changes before submitting a pull request.

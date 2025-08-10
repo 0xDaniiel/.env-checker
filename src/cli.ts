@@ -15,15 +15,18 @@ program
   .version("1.0.0")
   .option("--ci", "Run in CI mode (exit non-zero on failure)")
   .option("--generate", "Generate .env.example from .env")
-  .option("--path <file>", "Specify .env file path", ".env")
+  .option("--path <file>", "Specify .env file path(s), comma-separated", ".env")
   .option("--example <file>", "Specify .env.example path", ".env.example")
   .option("--json", "Output results in JSON format")
   .action(async (options) => {
-    const envPath = path.resolve(process.cwd(), options.path);
+    // Parse multiple env file paths, resolve absolute paths
+    const envPaths = options.path
+      .split(",")
+      .map((p: string) => path.resolve(process.cwd(), p.trim()));
 
     if (options.generate) {
       try {
-        const envContent = fs.readFileSync(envPath, "utf-8");
+        const envContent = fs.readFileSync(envPaths[0], "utf-8");
         const exampleContent = envContent
           .split("\n")
           .map((line) => {
@@ -34,7 +37,9 @@ program
           .join("\n");
         const examplePath = path.resolve(process.cwd(), options.example);
         fs.writeFileSync(examplePath, exampleContent, "utf-8");
-        console.log(chalk.green(`✅ Generated ${examplePath} from ${envPath}`));
+        console.log(
+          chalk.green(`✅ Generated ${examplePath} from ${envPaths[0]}`)
+        );
         process.exit(0);
       } catch (err) {
         console.error(chalk.red(`❌ Failed to generate .env.example:`), err);
@@ -42,10 +47,19 @@ program
       }
     }
 
-    const result = dotenv.config({ path: envPath });
-    if (result.error) {
-      console.error(chalk.red(`❌ Failed to load ${envPath}:`), result.error);
-      process.exit(1);
+    // Load and merge all env files, skipping missing files with warning
+    let mergedEnvVars: Record<string, string> = {};
+    for (const p of envPaths) {
+      if (!fs.existsSync(p)) {
+        console.warn(chalk.yellow(`⚠️ Skipping missing env file: ${p}`));
+        continue;
+      }
+      const result = dotenv.config({ path: p });
+      if (result.error) {
+        console.error(chalk.red(`❌ Failed to load ${p}:`), result.error);
+        process.exit(1);
+      }
+      mergedEnvVars = { ...mergedEnvVars, ...result.parsed };
     }
 
     const examplePath = path.resolve(process.cwd(), options.example);
@@ -58,10 +72,13 @@ program
     }
 
     const exampleVars = dotenv.parse(exampleContent);
-    const envVars = result.parsed || {};
 
-    const missing = Object.keys(exampleVars).filter((key) => !(key in envVars));
-    const extra = Object.keys(envVars).filter((key) => !(key in exampleVars));
+    const missing = Object.keys(exampleVars).filter(
+      (key) => !(key in mergedEnvVars)
+    );
+    const extra = Object.keys(mergedEnvVars).filter(
+      (key) => !(key in exampleVars)
+    );
 
     if (options.json) {
       const output = { missing, extra };
@@ -81,7 +98,7 @@ program
     }
 
     // Validate types
-    const typeValidationResult = validateTypes(envVars, exampleContent);
+    const typeValidationResult = validateTypes(mergedEnvVars, exampleContent);
     if (typeValidationResult.errors.length) {
       typeValidationResult.errors.forEach((err: string) =>
         console.error(chalk.red(`❌ ${err}`))
@@ -92,7 +109,7 @@ program
     }
 
     // Detect sensitive data
-    const sensitiveWarnings = detectSensitive(envVars);
+    const sensitiveWarnings = detectSensitive(mergedEnvVars);
     if (sensitiveWarnings.length) {
       sensitiveWarnings.forEach((warn) =>
         console.warn(chalk.yellow(`⚠️ ${warn}`))

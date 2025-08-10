@@ -1,15 +1,26 @@
 {
-  "name": "env",
+  "name": ".env-checker",
   "version": "1.0.0",
-  "description": "",
+  "description": "CLI & API to validate .env files",
   "main": "index.js",
+  "bin": {
+    "env-checker": "./dist/cli.js"
+  },
   "scripts": {
+    "build": "tsc",
+    "start": "ts-node src/cli.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
+  "keywords": [
+    "cli",
+    "dotenv",
+    "env",
+    "validation",
+    "typescript"
+  ],
+  "author": "0xDaniiel",
+  "license": "Apache-2.0",
+  "type": "module",
   "dependencies": {
     "chalk": "^5.5.0",
     "commander": "^14.0.0",

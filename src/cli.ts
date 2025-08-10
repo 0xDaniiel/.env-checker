@@ -3,6 +3,8 @@ import { Command } from "commander";
 import dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
+import { validateTypes } from "./validateTypes.ts";
+import { detectSensitive } from "./detectSensitive.ts";
 
 const program = new Command();
 
@@ -15,14 +17,12 @@ program
   .option("--path <file>", "Specify .env file path", ".env")
   .option("--example <file>", "Specify .env.example path", ".env.example")
   .option("--json", "Output results in JSON format")
-  .action((options) => {
+  .action(async (options) => {
     const envPath = path.resolve(process.cwd(), options.path);
 
-    // If --generate, read .env and write .env.example, then exit
     if (options.generate) {
       try {
         const envContent = fs.readFileSync(envPath, "utf-8");
-        // Strip secrets (basic: remove values, keep keys)
         const exampleContent = envContent
           .split("\n")
           .map((line) => {
@@ -41,7 +41,6 @@ program
       }
     }
 
-    // Normal check flow
     const result = dotenv.config({ path: envPath });
     if (result.error) {
       console.error(`Failed to load ${envPath}`, result.error);
@@ -78,7 +77,29 @@ program
       }
     }
 
-    if (options.ci && (missing.length || extra.length)) {
+    // Validate types
+    const typeValidationResult = validateTypes(envVars, exampleVars);
+    if (typeValidationResult.errors.length) {
+      typeValidationResult.errors.forEach((err: string) => console.error(err));
+      if (options.ci) process.exit(1);
+    } else {
+      console.log("All types/formats look good!");
+    }
+
+    // Detect sensitive data
+    const sensitiveWarnings = detectSensitive(envVars);
+    if (sensitiveWarnings.length) {
+      sensitiveWarnings.forEach((warn) => console.warn(warn));
+      if (options.ci) process.exit(1);
+    }
+
+    if (
+      options.ci &&
+      (missing.length ||
+        extra.length ||
+        typeValidationResult.errors.length ||
+        sensitiveWarnings.length)
+    ) {
       process.exit(1);
     } else {
       process.exit(0);

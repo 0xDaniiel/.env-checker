@@ -68,6 +68,14 @@ npx env-checker [options]
 
 ```
 
+### Running the Compiled CLI
+
+After building the project (`npm run build`), you can run the compiled CLI directly with Node.js:
+
+```
+node dist/cli.js --path ".env" --example ".env.example"
+```
+
 ## API Usage
 
 You can use `.env-checker` programmatically in your Node.js or TypeScript projects.
@@ -77,7 +85,7 @@ You can use `.env-checker` programmatically in your Node.js or TypeScript projec
 ```ts
 import { checkEnv } from "env-checker";
 
-async function runCheck() {
+function runCheck() {
   const result = checkEnv({
     envPaths: [".env", ".env.local"], // Paths to your .env files
     examplePath: ".env.example", // Path to your .env.example file
@@ -98,10 +106,12 @@ async function runCheck() {
   }
 }
 
-runCheck().catch((err) => {
+try {
+  runCheck();
+} catch (err) {
   console.error(err);
   process.exit(1);
-});
+}
 ```
 
 ### Options

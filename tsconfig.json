@@ -19,6 +19,7 @@
     "allowSyntheticDefaultImports": true,
     "target": "esnext",
     "types": ["jest", "node"],
+    "outDir": "./dist",
     // For nodejs:
     // "lib": ["esnext"],
     // "types": ["node"],

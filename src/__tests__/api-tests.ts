@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import dotenv from "dotenv";
-import { loadEnvFiles, loadExampleFile, checkEnv } from "../api.ts";
+import { loadEnvFiles, loadExampleFile, checkEnv } from "../api.js";
 
 // Mock fs and dotenv for testing
 jest.mock("fs");

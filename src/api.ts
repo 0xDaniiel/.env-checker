@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 import fs from "fs";
-import { validateTypes } from "./validateTypes.ts";
-import { detectSensitive } from "./detectSensitive.ts";
+import { validateTypes } from "./validateTypes.js";
+import { detectSensitive } from "./detectSensitive.js";
 export type CheckOptions = {
   envPaths: string[]; // paths to .env files, merged in order
   examplePath: string; // path to .env.example

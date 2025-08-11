@@ -4,9 +4,9 @@ import chalk from "chalk";
 import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
-import { loadEnvFiles, loadExampleFile } from "./api.ts";
-import { validateTypes } from "./validateTypes.ts";
-import { detectSensitive } from "./detectSensitive.ts";
+import { loadEnvFiles, loadExampleFile } from "./api.js";
+import { validateTypes } from "./validateTypes.js";
+import { detectSensitive } from "./detectSensitive.js";
 
 const program = new Command();
 

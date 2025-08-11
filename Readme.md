@@ -1,6 +1,6 @@
-# `env-checker` 🛡
+# `@0xdaniiel/env-checker` 🛡
 
-![npm version](https://img.shields.io/npm/v/env-checker)
+![npm version](https://img.shields.io/npm/v/@0xdaniiel/env-checker)
 
 > A fast, CI-friendly CLI & API to validate `.env` files — checks for missing/extra variables, type/format errors, and sensitive values. Includes `.env.example` generator.
 
@@ -8,7 +8,7 @@
 
 ## 📌 Overview
 
-`.env-checker` helps you **catch configuration issues early** — before they break production.  
+`@0xdaniiel/env-checker` helps you **catch configuration issues early** — before they break production.  
 It compares your `.env` against `.env.example`, validates formats, detects secrets, and can auto-generate `.env.example` from your current config.
 
 ---
@@ -43,9 +43,9 @@ Validate, enforce, and sanitize your `.env` files — locally and in CI/CD — s
 ## 📦 Installation
 
 ```
-npm install -g env-checker
+npm install -g @0xdaniiel/env-checker
 # or locally
-npm install --save-dev env-checker
+npm install --save-dev@0xdaniiel/env-checker
 ```
 
 ## 🖥 Usage
@@ -53,7 +53,8 @@ npm install --save-dev env-checker
 ### CLI
 
 ```
-npx env-checker [options]
+npx @0xdaniiel/env-checker [options]
+
 ```
 
 ```
@@ -78,12 +79,12 @@ node dist/cli.js --path ".env" --example ".env.example"
 
 ## API Usage
 
-You can use `.env-checker` programmatically in your Node.js or TypeScript projects.
+You can use `@0xdaniiel/env-checker` programmatically in your Node.js or TypeScript projects.
 
 ### Importing
 
 ```ts
-import { checkEnv } from "env-checker";
+import { checkEnv } from "@0xdaniiel/env-checker";
 
 function runCheck() {
   const result = checkEnv({

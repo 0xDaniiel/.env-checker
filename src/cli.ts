@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 import { Command } from "commander";
-import dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
 import chalk from "chalk";
+import path from "path";
+import fs from "fs";
+import dotenv from "dotenv";
+import { loadEnvFiles, loadExampleFile } from "./api.ts";
 import { validateTypes } from "./validateTypes.ts";
 import { detectSensitive } from "./detectSensitive.ts";
 
@@ -19,13 +20,14 @@ program
   .option("--example <file>", "Specify .env.example path", ".env.example")
   .option("--json", "Output results in JSON format")
   .action(async (options) => {
-    // Parse multiple env file paths, resolve absolute paths
+    // Parse and resolve env paths
     const envPaths = options.path
       .split(",")
       .map((p: string) => path.resolve(process.cwd(), p.trim()));
 
     if (options.generate) {
       try {
+        // Generate .env.example from first env file only
         const envContent = fs.readFileSync(envPaths[0], "utf-8");
         const exampleContent = envContent
           .split("\n")
@@ -47,32 +49,25 @@ program
       }
     }
 
-    // Load and merge all env files, skipping missing files with warning
-    let mergedEnvVars: Record<string, string> = {};
-    for (const p of envPaths) {
-      if (!fs.existsSync(p)) {
-        console.warn(chalk.yellow(`⚠️ Skipping missing env file: ${p}`));
-        continue;
-      }
-      const result = dotenv.config({ path: p });
-      if (result.error) {
-        console.error(chalk.red(`❌ Failed to load ${p}:`), result.error);
-        process.exit(1);
-      }
-      mergedEnvVars = { ...mergedEnvVars, ...result.parsed };
-    }
+    // Load env files and merge
+    const mergedEnvVars = loadEnvFiles(envPaths);
 
-    const examplePath = path.resolve(process.cwd(), options.example);
-    let exampleContent;
+    // Load example file content
+    let exampleContent: string;
     try {
-      exampleContent = fs.readFileSync(examplePath, "utf-8");
+      exampleContent = loadExampleFile(
+        path.resolve(process.cwd(), options.example)
+      );
     } catch (err) {
-      console.error(chalk.red(`❌ Failed to read ${examplePath}:`), err);
+      console.error(chalk.red(`❌ Failed to read example file:`), err);
       process.exit(1);
+      return;
     }
 
+    // Parse example vars
     const exampleVars = dotenv.parse(exampleContent);
 
+    // Check missing and extra vars
     const missing = Object.keys(exampleVars).filter(
       (key) => !(key in mergedEnvVars)
     );
@@ -81,8 +76,7 @@ program
     );
 
     if (options.json) {
-      const output = { missing, extra };
-      console.log(JSON.stringify(output, null, 2));
+      console.log(JSON.stringify({ missing, extra }, null, 2));
     } else {
       if (missing.length) {
         console.warn(

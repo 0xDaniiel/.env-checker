@@ -1,6 +1,6 @@
 # `.env-checker` 🛡
 
-![npm version](https://img.shields.io/npm/v/env-checker)
+![npm version](https://img.shields.io/npm/v/.env-checker)
 
 > A fast, CI-friendly CLI & API to validate `.env` files — checks for missing/extra variables, type/format errors, and sensitive values. Includes `.env.example` generator.
 
@@ -68,21 +68,69 @@ npx env-checker [options]
 
 ```
 
-## API
+## API Usage
 
-```
-import { checkEnv } from 'env-checker';
+You can use `.env-checker` programmatically in your Node.js or TypeScript projects.
 
-checkEnv({
-requiredFile: '.env.example',
-envFile: '.env',
-ci: true
+### Importing
+
+```ts
+import { checkEnv } from "env-checker";
+
+async function runCheck() {
+  const result = checkEnv({
+    envPaths: [".env", ".env.local"], // Paths to your .env files
+    examplePath: ".env.example", // Path to your .env.example file
+  });
+
+  console.log("Missing variables:", result.missing);
+  console.log("Extra variables:", result.extra);
+  console.log("Type errors:", result.typeErrors);
+  console.log("Sensitive warnings:", result.sensitiveWarnings);
+
+  if (
+    result.missing.length ||
+    result.extra.length ||
+    result.typeErrors.length ||
+    result.sensitiveWarnings.length
+  ) {
+    throw new Error("Environment variables validation failed");
+  }
+}
+
+runCheck().catch((err) => {
+  console.error(err);
+  process.exit(1);
 });
 ```
 
+### Options
+
+```
+| Option        | Description                               |
+| ------------- | ----------------------------------------- |
+| `envPaths`    | Array of paths to `.env` files to merge   |
+| `examplePath` | Path to `.env.example` file for reference |
+```
+
+### Return Value
+
+The `checkEnv` function returns an object containing:
+
+- `missing`: Array of variable names missing in your env files but present in example.
+- `extra`: Array of variable names present in env files but missing from example.
+- `typeErrors`: Array of strings describing type or format validation errors.
+- `sensitiveWarnings`: Array of strings warning about sensitive values detected.
+
+### Notes
+
+- You can integrate this API into your build or deploy scripts to enforce environment consistency.
+- The API works synchronously and throws on file read or parse errors.
+- For CI pipelines, use the CLI with the `--ci` flag for automatic failure on issues.
+
 ## 📜 License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+This project is licensed under the Apache 2.0 License. See the [LICENSE](LICENSE) file for details.
 
 ---
 

@@ -1,6 +1,6 @@
-# `.env-checker` 🛡
+# `env-checker` 🛡
 
-![npm version](https://img.shields.io/npm/v/.env-checker)
+![npm version](https://img.shields.io/npm/v/env-checker)
 
 > A fast, CI-friendly CLI & API to validate `.env` files — checks for missing/extra variables, type/format errors, and sensitive values. Includes `.env.example` generator.
 

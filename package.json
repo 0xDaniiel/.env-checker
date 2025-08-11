@@ -1,5 +1,5 @@
 {
-  "name": ".env-checker",
+  "name": "env-checker",
   "version": "1.0.0",
   "description": "CLI & API to validate .env files",
   "main": "index.js",
